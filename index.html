@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PetOffice — Sistema de Gestão para Pet Shops</title>
+  <meta name="description" content="Organize agendamentos, finanças, clientes e animais num só lugar. O sistema criado especialmente para pet shops."/>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #D85A30;
+      --brand-dark: #993C1D;
+      --brand-light: #FAECE7;
+      --brand-mid: #F0997B;
+      --accent: #1D9E75;
+      --accent-dark: #0F6E56;
+      --accent-light: #E1F5EE;
+      --bg: #F7F5F0;
+      --surface: #FFFFFF;
+      --border: #E2DED8;
+      --text: #2C2C2A;
+      --text-muted: #888780;
+      --radius: 12px;
+      --radius-lg: 18px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --shadow-lg: 0 10px 36px rgba(0,0,0,0.11);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--surface);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAVEGAÇÃO ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 36px; height: 36px;
+      background: var(--brand);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .nav-logo-text {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--brand);
+      letter-spacing: -0.3px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      transition: color .15s, background .15s;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--bg); }
+    .nav-cta {
+      background: var(--brand) !important;
+      color: white !important;
+      font-weight: 700 !important;
+    }
+    .nav-cta:hover { background: var(--brand-dark) !important; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(160deg, #fff 0%, var(--brand-light) 55%, #fff 100%);
+      padding: 90px 24px 80px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--brand-light);
+      border: 1px solid rgba(216,90,48,.25);
+      color: var(--brand-dark);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -1px;
+      max-width: 700px;
+      margin: 0 auto 20px;
+    }
+    .hero h1 .highlight {
+      color: var(--brand);
+      position: relative;
+      display: inline-block;
+    }
+    .hero h1 .highlight::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: -4px;
+      height: 4px;
+      background: var(--brand-mid);
+      border-radius: 2px;
+      opacity: .5;
+    }
+    .hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto 36px;
+      line-height: 1.65;
+    }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 60px;
+    }
+
+    /* ── BOTÕES ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 26px;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--brand); color: white; box-shadow: 0 4px 14px rgba(216,90,48,.3); }
+    .btn-primary:hover { background: var(--brand-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(216,90,48,.35); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+    .btn-ghost:hover { background: var(--bg); border-color: var(--brand-mid); color: var(--brand); }
+    .btn-accent { background: var(--accent); color: white; box-shadow: 0 4px 14px rgba(29,158,117,.25); }
+    .btn-accent:hover { background: var(--accent-dark); transform: translateY(-1px); }
+    .btn-lg { padding: 16px 32px; font-size: 16px; border-radius: var(--radius-lg); }
+
+    /* ── DEMO PREVIEW ── */
+    .hero-preview {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg), 0 0 0 6px rgba(216,90,48,.06);
+      overflow: hidden;
+    }
+    .preview-bar {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .preview-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .preview-bar-url {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin: 0 12px;
+      text-align: left;
+    }
+    .preview-inner {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      min-height: 360px;
+    }
+    .preview-sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    .preview-logo-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 14px 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+    .preview-logo-dot {
+      width: 28px; height: 28px;
+      background: var(--brand);
+      border-radius: 50%;
+      font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+    }
+    .preview-logo-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--brand);
+    }
+    .preview-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+      border-radius: 6px;
+      margin: 0 6px 2px;
+      cursor: pointer;
+    }
+    .preview-nav-item.active {
+      background: var(--brand-light);
+      color: var(--brand-dark);
+      font-weight: 700;
+    }
+    .preview-nav-icon { font-size: 14px; }
+    .preview-main {
+      padding: 18px;
+      background: var(--bg);
+    }
+    .preview-topbar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .preview-topbar-title { font-size: 12px; font-weight: 700; }
+    .preview-btn-mini {
+      background: var(--brand);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 4px 10px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .preview-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 9px;
+      margin-bottom: 14px;
+    }
+    .preview-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .preview-stat-label { font-size: 9px; color: var(--text-muted); margin-bottom: 3px; }
+    .preview-stat-val { font-size: 16px; font-weight: 800; }
+    .preview-stat-val.brand { color: var(--brand); }
+    .preview-stat-val.accent { color: var(--accent); }
+    .preview-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .preview-table-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 80px;
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .preview-table-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 80px;
+      padding: 8px 12px;
+      border-bottom: 1px solid #f5f3ef;
+      font-size: 10px;
+      align-items: center;
+    }
+    .preview-table-row:last-child { border-bottom: none; }
+    .preview-badge-mini {
+      display: inline-flex;
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-size: 9px;
+      font-weight: 700;
+    }
+    .pb-banho { background: #E6F1FB; color: #185FA5; }
+    .pb-tosa  { background: #FAEEDA; color: #BA7517; }
+    .pb-bt    { background: var(--brand-light); color: var(--brand-dark); }
+    .pb-ok    { background: var(--accent-light); color: var(--accent-dark); }
+
+    /* ── SEÇÃO GENÉRICA ── */
+    section { padding: 80px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--brand);
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: clamp(26px, 3.5vw, 42px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.18;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px;
+      color: var(--text-muted);
+      max-width: 560px;
+      line-height: 1.65;
+    }
+
+    /* ── NÚMEROS ── */
+    .numbers-bg {
+      background: var(--brand);
+      padding: 56px 24px;
+      text-align: center;
+    }
+    .numbers-grid {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 40px;
+    }
+    .number-item { }
+    .number-val {
+      font-size: 52px;
+      font-weight: 800;
+      color: white;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+    .number-val span { font-size: 32px; font-weight: 700; }
+    .number-label {
+      font-size: 14px;
+      color: rgba(255,255,255,.75);
+      margin-top: 6px;
+    }
+
+    /* ── FUNCIONALIDADES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+      margin-top: 52px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: box-shadow .15s, border-color .15s, transform .15s;
+    }
+    .feature-card:hover {
+      box-shadow: var(--shadow);
+      border-color: var(--brand-mid);
+      transform: translateY(-2px);
+    }
+    .feature-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    .fi-orange { background: var(--brand-light); }
+    .fi-green  { background: var(--accent-light); }
+    .fi-blue   { background: #E6F1FB; }
+    .fi-amber  { background: #FAEEDA; }
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+    .feature-card ul {
+      list-style: none;
+      margin-top: 12px;
+    }
+    .feature-card ul li {
+      font-size: 13px;
+      color: var(--text-muted);
+      padding: 3px 0;
+      padding-left: 18px;
+      position: relative;
+    }
+    .feature-card ul li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* ── FATURA DEMO ── */
+    .fatura-section {
+      background: var(--bg);
+      padding: 80px 24px;
+    }
+    .fatura-demo-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 52px;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .fatura-text { }
+    .fatura-text .section-sub { max-width: 100%; }
+    .fatura-checklist {
+      list-style: none;
+      margin-top: 24px;
+    }
+    .fatura-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .fatura-checklist li:last-child { border-bottom: none; }
+    .check-icon {
+      width: 24px; height: 24px;
+      background: var(--accent-light);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .fatura-mockup {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .fatura-mock-header {
+      background: var(--brand-light);
+      padding: 20px 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid rgba(216,90,48,.15);
+    }
+    .fatura-mock-logo {
+      width: 44px; height: 44px;
+      background: var(--brand);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      color: white;
+    }
+    .fatura-mock-name { font-size: 15px; font-weight: 800; color: var(--brand-dark); }
+    .fatura-mock-sub  { font-size: 11px; color: var(--brand); }
+    .fatura-mock-body { padding: 18px 22px; }
+    .fatura-mock-status {
+      background: var(--accent-light);
+      border: 1.5px solid #5DCAA5;
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-dark);
+      margin-bottom: 14px;
+    }
+    .fatura-mock-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid #f5f3ef;
+    }
+    .fatura-mock-row:last-of-type { border-bottom: none; }
+    .fatura-mock-label { color: var(--text-muted); }
+    .fatura-mock-total {
+      background: var(--accent-light);
+      border: 1px solid #5DCAA5;
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+    }
+    .fatura-mock-total-label { font-size: 12px; color: var(--accent-dark); font-weight: 600; }
+    .fatura-mock-total-val { font-size: 22px; font-weight: 800; color: var(--accent-dark); }
+    .fatura-mock-pix {
+      background: var(--brand-light);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 12px;
+    }
+    .fatura-mock-pix-label { font-size: 9px; font-weight: 700; color: var(--text-muted); letter-spacing: .8px; text-transform: uppercase; margin-bottom: 4px; }
+    .fatura-mock-pix-key { font-size: 14px; font-weight: 800; color: var(--brand); font-family: monospace; }
+    .fatura-mock-wpp {
+      background: #25D366;
+      color: white;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    /* ── COMO FUNCIONA ── */
+    .how-bg { background: var(--bg); padding: 80px 24px; }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0;
+      margin-top: 52px;
+      position: relative;
+    }
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 32px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--border), var(--border), transparent);
+    }
+    .step-item {
+      text-align: center;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .step-num {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      margin: 0 auto 18px;
+      box-shadow: var(--shadow);
+    }
+    .step-item:first-child .step-num { border-color: var(--brand); background: var(--brand-light); }
+    .step-item:last-child .step-num { border-color: var(--accent); background: var(--accent-light); }
+    .step-item h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .step-item p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── DEPOIMENTOS ── */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-top: 48px;
+    }
+    .testimonial-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+    }
+    .testimonial-stars { color: #F4B942; font-size: 16px; margin-bottom: 14px; letter-spacing: 2px; }
+    .testimonial-text {
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 18px;
+      font-style: italic;
+    }
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .author-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      background: var(--brand-light);
+      color: var(--brand-dark);
+      font-size: 15px;
+    }
+    .author-name { font-size: 14px; font-weight: 700; }
+    .author-role { font-size: 12px; color: var(--text-muted); }
+
+    /* ── PLANOS ── */
+    .pricing-section { padding: 80px 24px; text-align: center; }
+    .pricing-subtitle { font-size: 15px; color: var(--text-muted); margin-top: 12px; }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 900px;
+      margin: 52px auto 0;
+    }
+    .pricing-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      text-align: left;
+      position: relative;
+      transition: box-shadow .15s;
+    }
+    .pricing-card:hover { box-shadow: var(--shadow); }
+    .pricing-card.featured {
+      border-color: var(--brand);
+      background: var(--brand-light);
+    }
+    .pricing-featured-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--brand);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+    .pricing-plan-name {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .pricing-featured .pricing-plan-name { color: var(--brand); }
+    .pricing-price {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .pricing-price span { font-size: 18px; font-weight: 600; vertical-align: top; margin-top: 8px; display: inline-block; }
+    .pricing-period { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .pricing-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+    .pricing-feature-list { list-style: none; }
+    .pricing-feature-list li {
+      font-size: 14px;
+      padding: 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--text);
+    }
+    .pricing-feature-list li .chk { color: var(--accent); font-weight: 700; font-size: 15px; }
+    .pricing-feature-list li .x   { color: var(--text-muted); }
+    .pricing-cta {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .pricing-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 28px;
+    }
+
+    /* ── FAQ ── */
+    .faq-section { padding: 80px 24px; background: var(--bg); }
+    .faq-inner { max-width: 700px; margin: 0 auto; }
+    .faq-list { margin-top: 40px; }
+    .faq-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 18px 22px;
+      text-align: left;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: background .12s;
+    }
+    .faq-question:hover { background: var(--bg); }
+    .faq-arrow {
+      font-size: 16px;
+      color: var(--text-muted);
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .faq-answer {
+      display: none;
+      padding: 0 22px 18px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .faq-item.open .faq-answer { display: block; }
+
+    /* ── CTA FINAL ── */
+    .cta-section {
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .cta-section h2 {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+    .cta-section p {
+      font-size: 17px;
+      color: rgba(255,255,255,.8);
+      margin-bottom: 36px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+    .btn-white { background: white; color: var(--brand-dark); font-weight: 800; }
+    .btn-white:hover { background: var(--brand-light); transform: translateY(-1px); }
+    .btn-outline-white {
+      background: transparent;
+      color: white;
+      border: 2px solid rgba(255,255,255,.5);
+      font-weight: 700;
+    }
+    .btn-outline-white:hover { border-color: white; background: rgba(255,255,255,.1); }
+
+    /* ── RODAPÉ ── */
+    footer {
+      background: var(--text);
+      color: rgba(255,255,255,.6);
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .footer-inner { max-width: 1100px; margin: 0 auto; }
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .footer-logo-icon {
+      width: 32px; height: 32px;
+      background: var(--brand);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .footer-logo-text { font-size: 15px; font-weight: 800; color: white; }
+    .footer-tagline { font-size: 13px; margin-bottom: 20px; }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .footer-links a { color: rgba(255,255,255,.5); text-decoration: none; font-size: 13px; transition: color .13s; }
+    .footer-links a:hover { color: white; }
+    .footer-copy { font-size: 12px; }
+
+    /* ── RESPONSIVO ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 16px; }
+      .nav-links { display: none; }
+      .hero { padding: 60px 20px 52px; }
+      section, .fatura-section, .how-bg, .faq-section, .pricing-section { padding: 56px 20px; }
+      .fatura-demo-wrap { grid-template-columns: 1fr; gap: 32px; }
+      .preview-inner { grid-template-columns: 1fr; }
+      .preview-sidebar { display: none; }
+      .preview-stats { grid-template-columns: 1fr 1fr; }
+      .steps-grid::before { display: none; }
+      .numbers-grid { gap: 28px; }
+      .number-val { font-size: 40px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 28px; }
+      .btn-lg { padding: 13px 22px; font-size: 14px; }
+      .preview-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .pricing-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Animação suave na entrada */
+    @media (prefers-reduced-motion: no-preference) {
+      .hero, .feature-card, .testimonial-card, .step-item {
+        animation: fadeUp .5s ease both;
+      }
+      .feature-card:nth-child(2) { animation-delay: .06s; }
+      .feature-card:nth-child(3) { animation-delay: .12s; }
+      .feature-card:nth-child(4) { animation-delay: .18s; }
+      .feature-card:nth-child(5) { animation-delay: .06s; }
+      .feature-card:nth-child(6) { animation-delay: .12s; }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVEGAÇÃO ── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">🐾</div>
+      <span class="nav-logo-text">PetOffice</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#funcionalidades">Funcionalidades</a></li>
+      <li><a href="#fatura">Fatura Digital</a></li>
+      <li><a href="#como-funciona">Como funciona</a></li>
+      <li><a href="#planos">Planos</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#contato" class="nav-cta">Quero experimentar</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-badge">🐾 Sistema completo para pet shops</div>
+  <h1>Seu pet shop organizado.<br/>Seu tempo de <span class="highlight">volta pra você</span>.</h1>
+  <p>Agendamentos, finanças, estoque, faturamento mensal e muito mais — tudo num só lugar, simples de usar e acessível do celular.</p>
+  <div class="hero-actions">
+    <a href="#contato" class="btn btn-primary btn-lg">Quero experimentar grátis →</a>
+    <a href="#funcionalidades" class="btn btn-ghost btn-lg">Ver funcionalidades</a>
+  </div>
+
+  <!-- Preview do sistema -->
+  <div class="hero-preview">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#FC5F57"></div>
+      <div class="preview-dot" style="background:#FEBC2E"></div>
+      <div class="preview-dot" style="background:#27C840"></div>
+      <div class="preview-bar-url">app.petoffice.com.br</div>
+    </div>
+    <div class="preview-inner">
+      <div class="preview-sidebar">
+        <div class="preview-logo-row">
+          <div class="preview-logo-dot">🐾</div>
+          <div>
+            <div class="preview-logo-name">PetOffice</div>
+          </div>
+        </div>
+        <div class="preview-nav-item active"><span class="preview-nav-icon">📊</span> Dashboard</div>
+        <div class="preview-nav-item"><span class="preview-nav-icon">📅</span> Agendamentos</div>
+        <div class="preview-nav-item"><span class="preview-nav-icon">👥</span> Clientes</div>
+        <div class="preview-nav-item"><span class="preview-nav-icon">🐶</span> Animais</div>
+        <div class="preview-nav-item"><span class="preview-nav-icon">💰</span> Financeiro</div>
+        <div class="preview-nav-item"><span class="preview-nav-icon">📋</span> Faturas</div>
+        <div class="preview-nav-item"><span class="preview-nav-icon">🛒</span> Estoque</div>
+        <div class="preview-nav-item"><span class="preview-nav-icon">🏨</span> Hotelzinho</div>
+      </div>
+      <div class="preview-main">
+        <div class="preview-topbar">
+          <span class="preview-topbar-title">📊 Dashboard — Maio 2026</span>
+          <button class="preview-btn-mini">+ Novo agendamento</button>
+        </div>
+        <div class="preview-stats">
+          <div class="preview-stat">
+            <div class="preview-stat-label">Agendamentos hoje</div>
+            <div class="preview-stat-val brand">12</div>
+          </div>
+          <div class="preview-stat">
+            <div class="preview-stat-label">Faturamento mês</div>
+            <div class="preview-stat-val accent">R$4.820</div>
+          </div>
+          <div class="preview-stat">
+            <div class="preview-stat-label">Clientes ativos</div>
+            <div class="preview-stat-val">87</div>
+          </div>
+          <div class="preview-stat">
+            <div class="preview-stat-label">No Hotelzinho</div>
+            <div class="preview-stat-val">3</div>
+          </div>
+        </div>
+        <div class="preview-table">
+          <div class="preview-table-header">
+            <span>Cliente</span><span>Animal</span><span>Serviço</span><span>Status</span>
+          </div>
+          <div class="preview-table-row">
+            <span>Maria S.</span><span>Thor 🐕</span>
+            <span><div class="preview-badge-mini pb-banho">Banho</div></span>
+            <span><div class="preview-badge-mini pb-ok">✓ Confirmado</div></span>
+          </div>
+          <div class="preview-table-row">
+            <span>João P.</span><span>Luna 🐈</span>
+            <span><div class="preview-badge-mini pb-tosa">Tosa</div></span>
+            <span><div class="preview-badge-mini pb-ok">✓ Confirmado</div></span>
+          </div>
+          <div class="preview-table-row">
+            <span>Ana R.</span><span>Bolinha 🐕</span>
+            <span><div class="preview-badge-mini pb-bt">Banho + Tosa</div></span>
+            <span><div class="preview-badge-mini pb-ok">✓ Confirmado</div></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── NÚMEROS ── -->
+<div class="numbers-bg">
+  <div class="numbers-grid">
+    <div class="number-item">
+      <div class="number-val">8<span>+</span></div>
+      <div class="number-label">módulos integrados</div>
+    </div>
+    <div class="number-item">
+      <div class="number-val">100<span>%</span></div>
+      <div class="number-label">no navegador, sem instalar nada</div>
+    </div>
+    <div class="number-item">
+      <div class="number-val">1<span>h</span></div>
+      <div class="number-label">para entrar em produção</div>
+    </div>
+    <div class="number-item">
+      <div class="number-val">24<span>/7</span></div>
+      <div class="number-label">acesso pelo celular</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FUNCIONALIDADES ── -->
+<section id="funcionalidades">
+  <div class="section-inner">
+    <p class="section-label">O que está incluído</p>
+    <h2 class="section-title">Tudo que seu pet shop precisa,<br/>num sistema só</h2>
+    <p class="section-sub">Nada de planilha no Google, papel no balcão ou WhatsApp pra lembrar dos agendamentos. O PetOffice concentra tudo.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon fi-orange">📅</div>
+        <h3>Agenda visual semanal</h3>
+        <p>Visualize todos os agendamentos da semana num calendário por hora. Arraste, confirme e acompanhe o dia em tempo real.</p>
+        <ul>
+          <li>Banho, tosa, banho+tosa e hospedagem</li>
+          <li>Detecção de conflitos de horário</li>
+          <li>Horários bloqueados automáticos</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-green">💰</div>
+        <h3>Financeiro completo</h3>
+        <p>Controle entradas e saídas, registre pagamentos, separe clientes avulsos de mensalistas e veja o resultado do mês.</p>
+        <ul>
+          <li>Receitas, despesas e lucro líquido</li>
+          <li>Gráficos por período</li>
+          <li>Relatório de serviços por tipo</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-orange">📋</div>
+        <h3>Fatura digital mensal</h3>
+        <p>Gere faturas para clientes mensalistas com link público compartilhável. O cliente vê os serviços, o total e os dados de pagamento.</p>
+        <ul>
+          <li>Link único por fatura</li>
+          <li>Botão direto para pagar via PIX</li>
+          <li>Status: aberta ou paga</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-blue">👥</div>
+        <h3>Gestão de clientes e pets</h3>
+        <p>Cadastro completo de tutores, animais, raças, pesos e observações. Histórico de atendimentos sempre disponível.</p>
+        <ul>
+          <li>Perfil detalhado por animal</li>
+          <li>Histórico por tutor</li>
+          <li>Clientes avulsos e mensalistas</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-green">🏨</div>
+        <h3>Hotelzinho pet</h3>
+        <p>Controle as hospedagens com datas de entrada e saída, pet alojado e valor cobrado. Fácil de ver quem está no hotel hoje.</p>
+        <ul>
+          <li>Check-in e check-out</li>
+          <li>Integrado à fatura do mensalista</li>
+          <li>Visão de ocupação atual</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-amber">🛒</div>
+        <h3>Estoque e vendas de produtos</h3>
+        <p>Cadastre os produtos da loja, controle o estoque e registre vendas avulsas ou na fatura mensal do cliente.</p>
+        <ul>
+          <li>Baixa automática no estoque</li>
+          <li>Alerta de estoque baixo</li>
+          <li>Venda integrada ao financeiro</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FATURA DIGITAL ── -->
+<div class="fatura-section" id="fatura">
+  <div class="fatura-demo-wrap">
+    <div class="fatura-text">
+      <p class="section-label">Fatura digital</p>
+      <h2 class="section-title">Fim do "quanto foi no mês?" pelo WhatsApp</h2>
+      <p class="section-sub">Com um clique, você gera uma fatura pública com todos os serviços do mês. O cliente acessa pelo celular, vê o detalhamento e paga na hora.</p>
+      <ul class="fatura-checklist">
+        <li>
+          <div class="check-icon">✓</div>
+          <div>Link exclusivo por cliente e por mês, sem precisar criar conta</div>
+        </li>
+        <li>
+          <div class="check-icon">✓</div>
+          <div>Serviços, produtos e hospedagens listados com data e valor</div>
+        </li>
+        <li>
+          <div class="check-icon">✓</div>
+          <div>Dados do PIX e botão para enviar comprovante via WhatsApp</div>
+        </li>
+        <li>
+          <div class="check-icon">✓</div>
+          <div>Marque como paga com um clique — status atualiza na hora para o cliente</div>
+        </li>
+      </ul>
+    </div>
+    <div class="fatura-mockup">
+      <div class="fatura-mock-header">
+        <div class="fatura-mock-logo">🐾</div>
+        <div>
+          <div class="fatura-mock-name">Exemplo Pet Shop</div>
+          <div class="fatura-mock-sub">Fatura de serviços — Maio 2026</div>
+        </div>
+      </div>
+      <div class="fatura-mock-body">
+        <div class="fatura-mock-status">✅ Fatura paga — Obrigado!</div>
+        <div class="fatura-mock-row">
+          <span class="fatura-mock-label">Cliente</span>
+          <strong>Maria Silva</strong>
+        </div>
+        <div class="fatura-mock-row">
+          <span class="fatura-mock-label">12/06 — Banho (Thor)</span>
+          <strong>R$ 60,00</strong>
+        </div>
+        <div class="fatura-mock-row">
+          <span class="fatura-mock-label">19/06 — Tosa (Thor)</span>
+          <strong>R$ 80,00</strong>
+        </div>
+        <div class="fatura-mock-row">
+          <span class="fatura-mock-label">25/06 — Ração Premium</span>
+          <strong>R$ 95,00</strong>
+        </div>
+        <div class="fatura-mock-total">
+          <div class="fatura-mock-total-label">💰 Total</div>
+          <div class="fatura-mock-total-val">R$ 235,00</div>
+        </div>
+        <div class="fatura-mock-pix">
+          <div class="fatura-mock-pix-label">🔵 PIX — Chave CNPJ</div>
+          <div class="fatura-mock-pix-key">00.000.000/0001-01</div>
+        </div>
+        <div class="fatura-mock-wpp">💬 Enviar comprovante pelo WhatsApp</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── COMO FUNCIONA ── -->
+<div class="how-bg" id="como-funciona">
+  <div class="section-inner" style="text-align:center">
+    <p class="section-label">Como funciona</p>
+    <h2 class="section-title">Da contratação ao primeiro agendamento<br/>em menos de 1 hora</h2>
+    <p class="section-sub" style="margin: 0 auto;">Sem instalação, sem complicação. O PetOffice é entregue pronto para usar, configurado com os dados do seu pet shop.</p>
+
+    <div class="steps-grid">
+      <div class="step-item">
+        <div class="step-num">📩</div>
+        <h3>1. Você entra em contato</h3>
+        <p>Manda mensagem pelo WhatsApp e a gente entende as necessidades do seu pet shop.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">⚙️</div>
+        <h3>2. Configuramos tudo pra você</h3>
+        <p>Criamos o sistema com a identidade do seu pet shop. Você não precisa mexer em nada técnico.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">🎓</div>
+        <h3>3. Treinamento rápido</h3>
+        <p>Uma chamada de vídeo de 30 minutos e você já sabe usar todas as funcionalidades.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">🚀</div>
+        <h3>4. No ar e funcionando</h3>
+        <p>Seu sistema online com link exclusivo, pronto pra receber agendamentos e controlar tudo.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DEPOIMENTOS ── -->
+<section>
+  <div class="section-inner" style="text-align:center">
+    <p class="section-label">Quem já usa</p>
+    <h2 class="section-title">O que os donos de pet shop dizem</h2>
+    <div class="testimonials-grid" style="text-align:left">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Antes eu anotava tudo no papel e esquecia agendamento toda semana. Agora consigo ver o dia inteiro num calendário. Mudou minha vida."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">CS</div>
+          <div>
+            <div class="author-name">Cláudia Santos</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"A fatura digital foi o que me convenceu. Meus clientes mensalistas adoram receber o link, fica bem profissional. Parece sistema de empresa grande."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">RF</div>
+          <div>
+            <div class="author-name">Rodrigo Ferreira</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"O suporte é incrível. Tive dúvida numa sexta à noite e foi respondida rapidinho. Nunca usei um sistema com atendimento assim."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">MA</div>
+          <div>
+            <div class="author-name">Mariana Alves</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PLANOS ── -->
+<div class="pricing-section" id="planos">
+  <p class="section-label">Planos</p>
+  <h2 class="section-title">Simples e transparente</h2>
+  <p class="pricing-subtitle">Sem taxa de implantação. Sem contrato anual. Cancele quando quiser.</p>
+
+  <div style="background:var(--accent-light);border:1.5px solid #5DCAA5;border-radius:var(--radius-lg);padding:16px 24px;max-width:900px;margin:0 auto 28px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:18px">🎉</span>
+    <div style="text-align:left">
+      <div style="font-size:14px;font-weight:800;color:var(--accent-dark)">Oferta por tempo limitado — Plano Completo por R$&nbsp;99/mês</div>
+      <div style="font-size:13px;color:var(--accent-dark);opacity:.85">E o primeiro mês é <strong>grátis</strong> para você testar sem compromisso.</div>
+    </div>
+  </div>
+
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-plan-name">Essencial</div>
+      <div class="pricing-price"><span>R$</span>99</div>
+      <div class="pricing-period">por mês</div>
+      <hr class="pricing-divider"/>
+      <ul class="pricing-feature-list">
+        <li><span class="chk">✓</span> Agendamentos ilimitados</li>
+        <li><span class="chk">✓</span> Clientes e animais</li>
+        <li><span class="chk">✓</span> Financeiro básico</li>
+        <li><span class="chk">✓</span> Hotelzinho</li>
+        <li><span class="x">–</span> <span style="color:var(--text-muted)">Fatura digital mensal</span></li>
+        <li><span class="x">–</span> <span style="color:var(--text-muted)">Estoque e vendas</span></li>
+        <li><span class="x">–</span> <span style="color:var(--text-muted)">Atendimento médico</span></li>
+      </ul>
+      <a href="#contato" class="btn btn-ghost pricing-cta">Começar com Essencial</a>
+    </div>
+
+    <div class="pricing-card featured">
+      <div class="pricing-featured-badge">🔥 Mais escolhido</div>
+      <div class="pricing-plan-name" style="color:var(--brand)">Completo</div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:2px">
+        <div class="pricing-price"><span>R$</span>99</div>
+        <div style="font-size:15px;color:var(--text-muted);text-decoration:line-through;font-weight:600">R$&nbsp;150</div>
+      </div>
+      <div class="pricing-period">por mês · <strong style="color:var(--accent-dark)">1º mês grátis</strong></div>
+      <hr class="pricing-divider" style="border-color:rgba(216,90,48,.2)"/>
+      <ul class="pricing-feature-list">
+        <li><span class="chk">✓</span> Tudo do Essencial</li>
+        <li><span class="chk">✓</span> Fatura digital mensal</li>
+        <li><span class="chk">✓</span> Estoque e controle de vendas</li>
+        <li><span class="chk">✓</span> Atendimento médico veterinário</li>
+        <li><span class="chk">✓</span> Relatórios e gráficos avançados</li>
+        <li><span class="chk">✓</span> Suporte prioritário via WhatsApp</li>
+        <li><span class="chk">✓</span> Atualizações incluídas</li>
+      </ul>
+      <a href="#contato" class="btn btn-primary pricing-cta">Quero o Completo →</a>
+    </div>
+  </div>
+  <p class="pricing-note">Não tem mensalidade de surpresa. O que você vê é o que paga. 🐾</p>
+</div>
+
+<!-- ── FAQ ── -->
+<div class="faq-section" id="faq">
+  <div class="faq-inner">
+    <p class="section-label" style="text-align:center">Dúvidas frequentes</p>
+    <h2 class="section-title" style="text-align:center">Perguntas que todo mundo faz</h2>
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Preciso instalar algum programa? <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">Não. O PetOffice funciona direto no navegador — Chrome, Safari, qualquer um. Sem download, sem instalação. Você acessa pelo computador, tablet ou celular.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Quanto tempo leva para começar a usar? <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">A gente configura tudo em até 48 horas úteis após a contratação. Depois de uma chamada de 30 minutos para treinamento ou uma rápida visita local, você já estará usando com segurança.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Posso acessar pelo celular? <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">Sim! O sistema é totalmente responsivo. Você consegue ver a agenda do dia, confirmar agendamentos e gerar faturas direto do celular, de onde estiver.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Como funciona a fatura digital? <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">No final do mês, você acessa a aba de faturas, seleciona o cliente mensalista e gera a fatura. O sistema cria um link único que você envia pelo WhatsApp. O cliente abre no celular, vê todos os serviços e os dados para pagamento via PIX.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Meus dados ficam seguros? <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">Sim. O PetOffice usa Firebase do Google para armazenar os dados, com criptografia e autenticação. Cada pet shop tem seu próprio banco de dados isolado — nenhum outro estabelecimento tem acesso aos seus dados.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Posso cancelar quando quiser? <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">Sim, sem multa e sem burocracia. Basta avisar com 30 dias de antecedência. Seus dados ficam disponíveis para exportação antes do cancelamento.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── CTA FINAL ── -->
+<div class="cta-section" id="contato">
+  <h2>Pronto para organizar seu pet shop?</h2>
+  <p>Manda uma mensagem pelo WhatsApp. A gente apresenta o sistema, tira suas dúvidas e já configura tudo pra você.</p>
+  <div class="cta-actions">
+    <a href="https://wa.me/5511989443902?text=Olá!%20Quero%20conhecer%20o%20PetOffice" 
+       target="_blank"
+       class="btn btn-white btn-lg">
+      💬 Falar pelo WhatsApp
+    </a>
+    <a href="mailto:marcossouzacorporativo@gmail.com" class="btn btn-outline-white btn-lg">
+      ✉️ Enviar e-mail
+    </a>
+  </div>
+</div>
+
+<!-- ── RODAPÉ ── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <div class="footer-logo-icon">🐾</div>
+      <span class="footer-logo-text">PetOffice</span>
+    </div>
+    <p class="footer-tagline">Sistema de gestão criado especialmente para pet shops brasileiros.</p>
+    <div class="footer-links">
+      <a href="#funcionalidades">Funcionalidades</a>
+      <a href="#fatura">Fatura digital</a>
+      <a href="#planos">Planos</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://wa.me/5511989443902" target="_blank">WhatsApp</a>
+    </div>
+    <p class="footer-copy">© 2025 PetOffice · Todos os direitos reservados</p>
+  </div>
+</footer>
+
+<script>
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+</script>
+</body>
+</html>
